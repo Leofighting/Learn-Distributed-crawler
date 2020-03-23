@@ -67,7 +67,115 @@
 >
 > 广度优先：通过队列实现
 >
+
+### 字符串编码
+
+> 1. 计算机智能处理数字，文本转换为数字才能处理
+> 2. ASCII 编码成为美国人的标准编码，为了处理中文，中国制定了 `GB2312` 编码，用两个字节表示一个汉字，而且其他国家也发明了自己独有的字节编码，导致标准越来越多
+> 3. Unicode 出现后，将所有语言统一到一套编码里
+>    - Unicode 可以解决乱码问题，但是增加了一倍的存储空间
+>    - 内存处理更简单
+> 4. `utf-8` 编码的出现，把英文变为1个字节，汉字3个字节
+>    - 节约了内存空间，但是增加了内存处理的复杂度
+> 5. 改善：读取：转换为 Unicode 编码；保存：转换为 `utf-8` 编码
+
+### 爬虫的去重策略
+
+> 1. 将访问过的 `url` 保存到数据库中
+> 2. 将访问过的 `url` 保存到 `set` 中，只需要 `o(1)` 时间复杂度就可以查询`url`
+>    - 缺点：内存占用会越来越大
+> 3. `url` 经过 `md5` 等方法哈希后保存到 `set` 中，能够将 `url` 压缩到同样的长度
+> 4. 使用 `bitmap` 方法，将访问过的 `url` 通过 `hash` 函数映射到某一位
+>    - 缺点：冲突非常高
+> 5. 改进后使用 `bloomfilter`方法，多重 `hash` 函数降低冲突
+
+
+
+## `scrapy`
+
+```
+Scrapy是适用于Python的一个快速、高层次的屏幕抓取和web抓取框架，用于抓取web站点并从页面中提取结构化的数据。Scrapy用途广泛，可以用于数据挖掘、监测和自动化测试。
+```
+
+[官网](https://scrapy.org/)
+
+> 安装 `scrapy` 框架：`pip install scrapy`
+>
+> 新建 `scrapy` 项目：`scrapy startproject ArticleSpider`
+>
+> 目录结构：
+>
+> ![image-20200323181818527](E:\project\scrapy\scrapy_project\images\01.png)
+>
+> 创建爬虫项目：`scrapy genspider example example.com`
+
+> ```python
+> class JobboleSpider(scrapy.Spider):
+>     name = 'jobbole'  # 应用名称
+>     allowed_domains = ['http://blog.jobbole.com']
+>     start_urls = ['http://http://blog.jobbole.com/']  # 待爬取的网站
+> ```
+
+> `scrapy` 项目调试程序
+>
+> ```python
+> import sys
+> import os
 > 
+> from scrapy.cmdline import execute
+> 
+> sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+> execute(["scrapy", "crawl", "jobbole"])
+> ```
 
+> `settings.py`
+>
+> ```python
+> # Obey robots.txt rules
+> ROBOTSTXT_OBEY = False
+> ```
 
+### `xpath`
+
+>简介
+>
+>1. `xpath` 使用路径表达式在 `xml` 与 `html` 中进行导航
+>2. 包含标准函数库
+>3. 是一个 `w3c` 的标准
+
+> 节点关系
+>
+> 1. 父节点
+> 2. 子节点
+> 3. 兄弟节点
+> 4. 先辈节点
+> 5. 后代节点
+
+> 语法
+>
+> | **表达式**   | **说明**                                                     |
+> | ------------ | ------------------------------------------------------------ |
+> | article      | 选取所有article元素的所有子节点                              |
+> | /article     | 选取根元素article                                            |
+> | article/a    | 选取所有属于article的子元素的a元素                           |
+> | //div        | 选取所有div子元素(不论出现在文档任何地方)                    |
+> | article//div | 选取所有属于article元素的后代的div元素，不管它出现在article之下的任何位置 |
+> | //@class     | 选取所有名为class的属性                                      |
+
+> | **表达式**             | **说明**                                 |
+> | ---------------------- | ---------------------------------------- |
+> | /article/div[1]        | 选取属于article子元素的第一个div元素     |
+> | /article/div[last()]   | 选取属于article子元素的最后一个div元素   |
+> | /article/div[last()-1] | 选取属于article子元素的倒数第二个div元素 |
+> | //div[@lang]           | 选取所有拥有lang属性的div元素            |
+> | //div[@lang='eng']     | 选取所有lang属性为eng的div元素           |
+
+> | **表达式**             | **说明**                                                     |
+> | ---------------------- | ------------------------------------------------------------ |
+> | /div/*                 | 选取属于div元素的所有子节点                                  |
+> | //*                    | 选取所有元素                                                 |
+> | //div[@*]              | 选取所有带属性的元素                                         |
+> | /div/a \| //div/p      | 选取所有div元素的a和p元素                                    |
+> | //span \| //ul         | 选取文档中的span和ul元素                                     |
+> | article/div/p\| //span | 选取所有属于article元素的div元素的p元素 以及文档中所有的span元素 |
 
